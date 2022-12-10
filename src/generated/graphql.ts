@@ -14,6 +14,40 @@ export type Scalars = {
   Float: number;
 };
 
+export type AddPostInput = {
+  body?: InputMaybe<Scalars['String']>;
+  likeGiverIds?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  title: Scalars['String'];
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  addFriend?: Maybe<User>;
+  addPost?: Maybe<Post>;
+  likePost?: Maybe<Post>;
+  updateMyInfo?: Maybe<User>;
+};
+
+
+export type MutationAddFriendArgs = {
+  userId: Scalars['ID'];
+};
+
+
+export type MutationAddPostArgs = {
+  input: AddPostInput;
+};
+
+
+export type MutationLikePostArgs = {
+  postId: Scalars['ID'];
+};
+
+
+export type MutationUpdateMyInfoArgs = {
+  input: UpdateMyInfoInput;
+};
+
 /** 貼文 */
 export type Post = {
   __typename?: 'Post';
@@ -59,6 +93,12 @@ export type QueryPostArgs = {
 
 export type QueryUserArgs = {
   name: Scalars['String'];
+};
+
+export type UpdateMyInfoInput = {
+  age?: InputMaybe<Scalars['Int']>;
+  friendIds?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  name?: InputMaybe<Scalars['String']>;
 };
 
 /** 使用者 */
@@ -151,24 +191,37 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  AddPostInput: AddPostInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
+  Mutation: ResolverTypeWrapper<{}>;
   Post: ResolverTypeWrapper<Post>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
+  UpdateMyInfoInput: UpdateMyInfoInput;
   User: ResolverTypeWrapper<User>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  AddPostInput: AddPostInput;
   Boolean: Scalars['Boolean'];
   ID: Scalars['ID'];
   Int: Scalars['Int'];
+  Mutation: {};
   Post: Post;
   Query: {};
   String: Scalars['String'];
+  UpdateMyInfoInput: UpdateMyInfoInput;
   User: User;
+};
+
+export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  addFriend?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationAddFriendArgs, 'userId'>>;
+  addPost?: Resolver<Maybe<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<MutationAddPostArgs, 'input'>>;
+  likePost?: Resolver<Maybe<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<MutationLikePostArgs, 'postId'>>;
+  updateMyInfo?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateMyInfoArgs, 'input'>>;
 };
 
 export type PostResolvers<ContextType = any, ParentType extends ResolversParentTypes['Post'] = ResolversParentTypes['Post']> = {
@@ -205,6 +258,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
 };
 
 export type Resolvers<ContextType = any> = {
+  Mutation?: MutationResolvers<ContextType>;
   Post?: PostResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;

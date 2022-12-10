@@ -14,9 +14,26 @@ export const findUserByUserId = (userId: string) => {
 
 export const findUserByName = (name: string) =>
   db.users.find(user => user.name === name) || null
-  
+
 export const findPostByPostId = (postId: string) =>
   db.posts.find(post => post.id === postId) || null
+
+export const updateUserInfo = (userId: string, data: Type.UpdateMyInfoInput) =>
+  Object.assign(findUserByUserId(userId)!, data)
+
+export const addPost = ({ authorId, title, body }: addPostInputType) => {
+  return db.posts[db.posts.length] = {
+    id: (Number(db.posts[db.posts.length - 1].id) + 1).toString(),
+    authorId,
+    title,
+    body: body || '',
+    likeGiverIds: [],
+    createdAt: new Date().toISOString()
+  }
+}
+
+export const updatePost = (postId: string, data: Type.AddPostInput) =>
+  Object.assign(findPostByPostId(postId)!, data)
 
 // 實作 typeof 的 user-defined type guard
 export function isTypeof<T> (value: unknown, prim: T): value is T {
@@ -37,4 +54,15 @@ export function isDefined<T> (arg: T | undefined): arg is T {
 // Array filter 後的元素不會是 undefined 或 null
 export function isPresent<T> (arg: T | undefined | null): arg is T {
   return arg !== null && typeof arg !== 'undefined'
+}
+
+/********************************************************************************
+*
+          type helper
+*
+*********************************************************************************/
+type addPostInputType = {
+  authorId: string
+  title: string
+  body?: string | null
 }
