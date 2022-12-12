@@ -1,5 +1,9 @@
 import * as db from '../database'
 import * as Type from '../generated/graphql'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+const SALT_ROUNDS = 10
+const JWT_SECRET = process.env.JWT_SECRET || 'JWT_SECRET'
 
 // helper functions
 export const filterPostsByUserId = (userId: string) =>
@@ -22,19 +26,48 @@ export const updateUserInfo = (userId: string, data: Type.UpdateMyInfoInput) =>
   Object.assign(findUserByUserId(userId)!, data)
 
 export const addPost = ({ authorId, title, body }: addPostInputType) => {
-  return db.posts[db.posts.length] = {
+  return (db.posts[db.posts.length] = {
     id: (Number(db.posts[db.posts.length - 1].id) + 1).toString(),
     authorId,
     title,
     body: body || '',
     likeGiverIds: [],
     createdAt: new Date().toISOString()
-  }
+  })
 }
 
 export const updatePost = (postId: string, data: Type.AddPostInput) =>
   Object.assign(findPostByPostId(postId)!, data)
 
+export const hash = (text: string) => bcrypt.hash(text, SALT_ROUNDS)
+
+export const addUser = async ({
+  name,
+  email,
+  password,
+  age
+}: addUserInputType) => {
+  const user = (db.users[db.users.length] = {
+    id: (Number(db.users[db.users.length - 1].id) + 1).toString(),
+    name,
+    email,
+    password: await hash(password),
+    age,
+    friendIds: []
+  })
+  return user
+}
+
+export const createToken = ({ id, email, name }: createTokenInputType) =>
+  jwt.sign({ id, email, name }, JWT_SECRET, {
+    expiresIn: '1d'
+  })
+
+/********************************************************************************
+*
+          ts type guards
+*
+*********************************************************************************/
 // 實作 typeof 的 user-defined type guard
 export function isTypeof<T> (value: unknown, prim: T): value is T {
   if (prim === null) {
@@ -65,4 +98,17 @@ type addPostInputType = {
   authorId: string
   title: string
   body?: string | null
+}
+
+type addUserInputType = {
+  name: string
+  age: number
+  email: string
+  password: string
+}
+
+type createTokenInputType = {
+  id: string
+  email: string
+  name: string
 }

@@ -25,6 +25,10 @@ export type Mutation = {
   addFriend?: Maybe<User>;
   addPost?: Maybe<Post>;
   likePost?: Maybe<Post>;
+  /** 登入 */
+  login?: Maybe<Token>;
+  /** 註冊。 email 與 passwrod 必填 */
+  signUp?: Maybe<User>;
   updateMyInfo?: Maybe<User>;
 };
 
@@ -41,6 +45,20 @@ export type MutationAddPostArgs = {
 
 export type MutationLikePostArgs = {
   postId: Scalars['ID'];
+};
+
+
+export type MutationLoginArgs = {
+  email: Scalars['String'];
+  password: Scalars['String'];
+};
+
+
+export type MutationSignUpArgs = {
+  age: Scalars['Int'];
+  email: Scalars['String'];
+  name: Scalars['String'];
+  password: Scalars['String'];
 };
 
 
@@ -93,6 +111,11 @@ export type QueryPostArgs = {
 
 export type QueryUserArgs = {
   name: Scalars['String'];
+};
+
+export type Token = {
+  __typename?: 'Token';
+  token: Scalars['String'];
 };
 
 export type UpdateMyInfoInput = {
@@ -199,6 +222,7 @@ export type ResolversTypes = {
   Post: ResolverTypeWrapper<Post>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
+  Token: ResolverTypeWrapper<Token>;
   UpdateMyInfoInput: UpdateMyInfoInput;
   User: ResolverTypeWrapper<User>;
 };
@@ -213,6 +237,7 @@ export type ResolversParentTypes = {
   Post: Post;
   Query: {};
   String: Scalars['String'];
+  Token: Token;
   UpdateMyInfoInput: UpdateMyInfoInput;
   User: User;
 };
@@ -221,6 +246,8 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   addFriend?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationAddFriendArgs, 'userId'>>;
   addPost?: Resolver<Maybe<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<MutationAddPostArgs, 'input'>>;
   likePost?: Resolver<Maybe<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<MutationLikePostArgs, 'postId'>>;
+  login?: Resolver<Maybe<ResolversTypes['Token']>, ParentType, ContextType, RequireFields<MutationLoginArgs, 'email' | 'password'>>;
+  signUp?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationSignUpArgs, 'age' | 'email' | 'name' | 'password'>>;
   updateMyInfo?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateMyInfoArgs, 'input'>>;
 };
 
@@ -245,6 +272,11 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   users?: Resolver<Maybe<Array<Maybe<ResolversTypes['User']>>>, ParentType, ContextType>;
 };
 
+export type TokenResolvers<ContextType = any, ParentType extends ResolversParentTypes['Token'] = ResolversParentTypes['Token']> = {
+  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -261,6 +293,7 @@ export type Resolvers<ContextType = any> = {
   Mutation?: MutationResolvers<ContextType>;
   Post?: PostResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  Token?: TokenResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };
 
