@@ -1,9 +1,10 @@
+import express from 'express'
 import * as db from '../database'
 import * as Type from '../generated/graphql'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 const SALT_ROUNDS = 10
-const JWT_SECRET = process.env.JWT_SECRET || 'JWT_SECRET'
+const JWT_SECRET = process.env.JWT_SECRET
 
 // helper functions
 export const filterPostsByUserId = (userId: string) =>
@@ -58,10 +59,30 @@ export const addUser = async ({
   return user
 }
 
-export const createToken = ({ id, email, name }: createTokenInputType) =>
-  jwt.sign({ id, email, name }, JWT_SECRET, {
-    expiresIn: '1d'
+export const createToken = ({ id, email, name }: createTokenInputType) => {
+  const jwtToken = jwt.sign({ id, email, name }, JWT_SECRET!, {
+    expiresIn: '1 days'
   })
+  return jwtToken
+}
+
+export const getMe = async (req: express.Request) => {
+  // 1. 取出
+  const token = req.headers['foo-token'] as string | undefined
+  if (token) {
+    try {
+      // 2. 檢查 token + 取得解析出的資料
+      const me = await jwt.verify(token, JWT_SECRET!)
+      // 3. 放進 context
+      return  me 
+    } catch (e) {
+      console.log(e)
+      throw new Error('Your session expired. Sign in again.')
+    }
+  }
+  // 如果沒有 token 就回傳空的 context 出去
+  return null
+}
 
 /********************************************************************************
 *

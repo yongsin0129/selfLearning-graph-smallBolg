@@ -1,4 +1,4 @@
-if(process.env.NODE_ENV !== 'production'){
+if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 import { ApolloServer, gql } from 'apollo-server'
@@ -7,13 +7,22 @@ import { ApolloServer, gql } from 'apollo-server'
 import typeDefs from './schema'
 // Resolvers 是一個會對照 Schema 中 field 的 function map ，讓你可以計算並回傳資料給 GraphQL Server
 import resolvers from './resolvers'
+import * as helper from './helper'
 
 // 初始化 Web Server ，需傳入 typeDefs (Schema) 與 resolvers (Resolver)
 const server = new ApolloServer({
   // Schema 部分
   typeDefs,
   // Resolver 部分
-  resolvers
+  resolvers,
+  context: async ({ req }) => {
+    const me = await helper.getMe(req)
+    return {
+      // secret: process.env.SECRET
+      // PrismaModels,
+      me,
+    }
+  }
 })
 
 // 4. 啟動 Server

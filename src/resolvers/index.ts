@@ -6,7 +6,10 @@ import bcrypt from 'bcrypt'
 const resolvers: Type.Resolvers = {
   Query: {
     hello: () => 'world',
-    me: () => helper.findUserByUserId(db.meId),
+    me: (root, args, { me }) => {
+      if (!me) throw new Error ('please LogIn First');
+      return helper.findUserByUserId(me.id)
+    },
     users: () => db.users,
     user: (root, { name }, context) => helper.findUserByName(name),
     posts: () => db.posts,
