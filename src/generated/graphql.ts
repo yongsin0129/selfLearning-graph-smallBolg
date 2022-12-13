@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo } from 'graphql';
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -12,6 +12,8 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  DateTime: any;
+  custom_Date: any;
 };
 
 export type AddPostInput = {
@@ -102,8 +104,16 @@ export type Query = {
   __typename?: 'Query';
   /** 測試用 Hello World */
   hello?: Maybe<Scalars['String']>;
+  /** 詢問日期是否為週五... 使用他人寫的 import_Date */
+  import_isFriday?: Maybe<Scalars['Boolean']>;
+  /** 獲取現在時間 - 使用他人寫的 import_Date */
+  import_now?: Maybe<Scalars['DateTime']>;
+  /** 詢問日期是否為週五... TGIF!! */
+  isFriday?: Maybe<Scalars['Boolean']>;
   /** 取得目前使用者 */
   me?: Maybe<User>;
+  /** 獲取現在時間 */
+  now?: Maybe<Scalars['custom_Date']>;
   /** 依照 id 取得特定貼文 */
   post?: Maybe<Post>;
   /** 取得所有貼文 */
@@ -112,6 +122,16 @@ export type Query = {
   user?: Maybe<User>;
   /** 取得所有使用者 */
   users?: Maybe<Array<Maybe<User>>>;
+};
+
+
+export type QueryImport_IsFridayArgs = {
+  date: Scalars['DateTime'];
+};
+
+
+export type QueryIsFridayArgs = {
+  date: Scalars['custom_Date'];
 };
 
 
@@ -227,6 +247,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = {
   AddPostInput: AddPostInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -236,12 +257,14 @@ export type ResolversTypes = {
   Token: ResolverTypeWrapper<Token>;
   UpdateMyInfoInput: UpdateMyInfoInput;
   User: ResolverTypeWrapper<User>;
+  custom_Date: ResolverTypeWrapper<Scalars['custom_Date']>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   AddPostInput: AddPostInput;
   Boolean: Scalars['Boolean'];
+  DateTime: Scalars['DateTime'];
   ID: Scalars['ID'];
   Int: Scalars['Int'];
   Mutation: {};
@@ -251,7 +274,12 @@ export type ResolversParentTypes = {
   Token: Token;
   UpdateMyInfoInput: UpdateMyInfoInput;
   User: User;
+  custom_Date: Scalars['custom_Date'];
 };
+
+export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
+  name: 'DateTime';
+}
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   addFriend?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationAddFriendArgs, 'userId'>>;
@@ -277,7 +305,11 @@ export type PostResolvers<ContextType = any, ParentType extends ResolversParentT
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   hello?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  import_isFriday?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<QueryImport_IsFridayArgs, 'date'>>;
+  import_now?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  isFriday?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<QueryIsFridayArgs, 'date'>>;
   me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  now?: Resolver<Maybe<ResolversTypes['custom_Date']>, ParentType, ContextType>;
   post?: Resolver<Maybe<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<QueryPostArgs, 'id'>>;
   posts?: Resolver<Maybe<Array<Maybe<ResolversTypes['Post']>>>, ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'name'>>;
@@ -301,11 +333,17 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export interface Custom_DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['custom_Date'], any> {
+  name: 'custom_Date';
+}
+
 export type Resolvers<ContextType = any> = {
+  DateTime?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
   Post?: PostResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Token?: TokenResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
+  custom_Date?: GraphQLScalarType;
 };
 

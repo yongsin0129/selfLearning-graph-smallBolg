@@ -2,6 +2,7 @@ import * as Type from '../generated/graphql'
 import * as helper from '../helper'
 import * as db from '../database'
 import bcrypt from 'bcrypt'
+import { custom_resolvers } from './custom'
 
 const resolvers: Type.Resolvers = {
   Query: {
@@ -12,7 +13,11 @@ const resolvers: Type.Resolvers = {
     users: () => db.users,
     user: (root, { name }, context) => helper.findUserByName(name),
     posts: () => db.posts,
-    post: (root, { id }, context) => helper.findPostByPostId(id)
+    post: (root, { id }, context) => helper.findPostByPostId(id),
+    now: () => new Date(),
+    isFriday: (root, { date }:Type.Scalars['custom_Date']) => date.getDay() === 5,
+    import_now: () => new Date(),
+    import_isFriday: (root, { date }:Type.Scalars['DateTime']) => date.getDay() === 5
   },
   Mutation: {
     updateMyInfo: helper.isAuthenticated((parent, { input }, { me }) => {
@@ -98,7 +103,8 @@ const resolvers: Type.Resolvers = {
       // if (!parent.likeGiverIds) return []
       return helper.filterUsersByUserIds(parent.likeGiverIds || [])
     }
-  }
+  },
+  ...custom_resolvers
 }
 
 export default resolvers
