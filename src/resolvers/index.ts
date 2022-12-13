@@ -43,6 +43,11 @@ const resolvers: Type.Resolvers = {
       const { title, body } = input
       return helper.addPost({ authorId: me.id, title, body })
     }),
+    deletePost: helper.isAuthenticated(
+      helper.isPostAuthor((root, { postId }, { me }) =>
+        helper.deletePost(postId)
+      )
+    ),
     likePost: helper.isAuthenticated((parent, { postId }, { me }) => {
       const post = helper.findPostByPostId(postId)
       if (!post) throw new Error(`Post ${postId} Not Exists`)

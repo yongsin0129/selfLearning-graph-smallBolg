@@ -22,13 +22,19 @@ export type AddPostInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  /** 新增好友 */
   addFriend?: Maybe<User>;
+  /** 新增貼文 */
   addPost?: Maybe<Post>;
+  /** 刪除貼文 */
+  deletePost?: Maybe<Post>;
+  /** 按讚貼文 */
   likePost?: Maybe<Post>;
   /** 登入 */
   login?: Maybe<Token>;
   /** 註冊。 email 與 passwrod 必填 */
   signUp?: Maybe<User>;
+  /** 更新自己的資料 */
   updateMyInfo?: Maybe<User>;
 };
 
@@ -40,6 +46,11 @@ export type MutationAddFriendArgs = {
 
 export type MutationAddPostArgs = {
   input: AddPostInput;
+};
+
+
+export type MutationDeletePostArgs = {
+  postId: Scalars['ID'];
 };
 
 
@@ -245,6 +256,7 @@ export type ResolversParentTypes = {
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   addFriend?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationAddFriendArgs, 'userId'>>;
   addPost?: Resolver<Maybe<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<MutationAddPostArgs, 'input'>>;
+  deletePost?: Resolver<Maybe<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<MutationDeletePostArgs, 'postId'>>;
   likePost?: Resolver<Maybe<ResolversTypes['Post']>, ParentType, ContextType, RequireFields<MutationLikePostArgs, 'postId'>>;
   login?: Resolver<Maybe<ResolversTypes['Token']>, ParentType, ContextType, RequireFields<MutationLoginArgs, 'email' | 'password'>>;
   signUp?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationSignUpArgs, 'age' | 'email' | 'name' | 'password'>>;

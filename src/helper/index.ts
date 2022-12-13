@@ -90,12 +90,24 @@ export const getMe = async (req: express.Request) => {
 
 export const isAuthenticated =
   (resolverFunc: resolversFncType) =>
-  (
-    parent: any,
-    args: any,
-    context: any
-  ) => {
+  (parent: any, args: any, context: any) => {
     if (!context.me) throw new ForbiddenError('Not logged in.')
+    return resolverFunc.apply(null, [parent, args, context])
+  }
+
+export const deletePost = (postId: string) =>
+  db.posts.splice(
+    db.posts.findIndex(post => post.id === postId),
+    1
+  )[0]
+
+export const isPostAuthor =
+  (resolverFunc: resolversFncType) =>
+  (parent: any, args: any, context: any) => {
+    const { postId } = args
+    const { me } = context
+    const isAuthor = findPostByPostId(postId)?.authorId === me.id
+    if (!isAuthor) throw new ForbiddenError('Only Author Can Delete this Post')
     return resolverFunc.apply(null, [parent, args, context])
   }
 
@@ -150,9 +162,5 @@ type createTokenInputType = {
 }
 
 type resolversFncType = {
-  (
-    parent: any,
-    args: any,
-    context: any
-  ): any
+  (parent: any, args: any, context: any): any
 }
