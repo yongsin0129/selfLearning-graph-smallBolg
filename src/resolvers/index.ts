@@ -7,7 +7,7 @@ const resolvers: Type.Resolvers = {
   Query: {
     hello: () => 'world',
     me: (root, args, { me }) => {
-      if (!me) throw new Error ('please LogIn First');
+      if (!me) throw new Error('please LogIn First')
       return helper.findUserByUserId(me.id)
     },
     users: () => db.users,
@@ -16,48 +16,54 @@ const resolvers: Type.Resolvers = {
     post: (root, { id }, context) => helper.findPostByPostId(id)
   },
   Mutation: {
-    updateMyInfo: (parent, { input }, context) => {
+    updateMyInfo: (parent, { input }, { me }) => {
       // 過濾空值
       // const data = ['name', 'age'].reduce(
       //   (obj, key) => (input[key] ? { ...obj, [key]: input[key] } : obj),
       //   {}
       // )
-      return helper.updateUserInfo(db.meId, input)
+      if (!me) throw new Error('Plz Log In First')
+      return helper.updateUserInfo(me.id, input)
     },
-    addFriend: (parent, { userId }, context) => {
-      const me = helper.findUserByUserId(db.meId)
-      if (me?.friendIds.includes(userId))
+    addFriend: (parent, { userId }, { me }) => {
+      const _me = helper.findUserByUserId(me.id)
+      if (_me?.friendIds.includes(userId))
         throw new Error(`User ${userId} Already Friend.`)
 
       const friend = helper.findUserByUserId(userId)
-      const newMe = helper.updateUserInfo(db.meId, {
-        friendIds: me!.friendIds.concat(userId)
+      // 更新自已的好友清單
+      const newMe = helper.updateUserInfo(me.id, {
+        friendIds: _me!.friendIds.concat(userId)
       })
+      // 更新對方的好友清單
       helper.updateUserInfo(userId, {
-        friendIds: friend!.friendIds.concat(db.meId)
+        friendIds: friend!.friendIds.concat(me.id)
       })
 
       return newMe
     },
-    addPost: (parent, { input }, context) => {
+    addPost: (parent, { input }, { me }) => {
+      if (!me) throw new Error('Plz Log In First')
+
       const { title, body } = input
-      return helper.addPost({ authorId: db.meId, title, body })
+      return helper.addPost({ authorId: me.id, title, body })
     },
-    likePost: (parent, { postId }, context) => {
+    likePost: (parent, { postId }, { me }) => {
+      if (!me) throw new Error('Plz Log In First')
       const post = helper.findPostByPostId(postId)
 
       if (!post) throw new Error(`Post ${postId} Not Exists`)
 
-      if (!post.likeGiverIds.includes(db.meId)) {
+      if (!post.likeGiverIds.includes(me.id)) {
         return helper.updatePost(postId, {
           title: post.title,
-          likeGiverIds: post.likeGiverIds.concat(db.meId)
+          likeGiverIds: post.likeGiverIds.concat(me.id)
         })
       }
 
       return helper.updatePost(postId, {
         title: post.title,
-        likeGiverIds: post.likeGiverIds.filter(id => id === db.meId)
+        likeGiverIds: post.likeGiverIds.filter(id => id === me.id)
       })
     },
     signUp: async (root, { name, age, email, password }, context) => {

@@ -23,8 +23,9 @@ export const findUserByName = (name: string) =>
 export const findPostByPostId = (postId: string) =>
   db.posts.find(post => post.id === postId) || null
 
-export const updateUserInfo = (userId: string, data: Type.UpdateMyInfoInput) =>
-  Object.assign(findUserByUserId(userId)!, data)
+export const updateUserInfo = (userId: string, data: Type.UpdateMyInfoInput) =>{
+  return Object.assign(findUserByUserId(userId)!, data)
+}
 
 export const addPost = ({ authorId, title, body }: addPostInputType) => {
   return (db.posts[db.posts.length] = {
