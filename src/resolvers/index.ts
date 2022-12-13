@@ -6,30 +6,28 @@ import bcrypt from 'bcrypt'
 const resolvers: Type.Resolvers = {
   Query: {
     hello: () => 'world',
-    me: (root, args, { me }) => {
-      if (!me) throw new Error('please LogIn First')
+    me: helper.isAuthenticated((parent, args, { me }) => {
       return helper.findUserByUserId(me.id)
-    },
+    }),
     users: () => db.users,
     user: (root, { name }, context) => helper.findUserByName(name),
     posts: () => db.posts,
     post: (root, { id }, context) => helper.findPostByPostId(id)
   },
   Mutation: {
-    updateMyInfo: (parent, { input }, { me }) => {
+    updateMyInfo: helper.isAuthenticated((parent, { input }, { me }) => {
       // 過濾空值
       // const data = ['name', 'age'].reduce(
       //   (obj, key) => (input[key] ? { ...obj, [key]: input[key] } : obj),
       //   {}
       // )
-      if (!me) throw new Error('Plz Log In First')
       return helper.updateUserInfo(me.id, input)
-    },
-    addFriend: (parent, { userId }, { me }) => {
+    }),
+
+    addFriend: helper.isAuthenticated((parent, { userId }, { me }) => {
       const _me = helper.findUserByUserId(me.id)
       if (_me?.friendIds.includes(userId))
         throw new Error(`User ${userId} Already Friend.`)
-
       const friend = helper.findUserByUserId(userId)
       // 更新自已的好友清單
       const newMe = helper.updateUserInfo(me.id, {
@@ -39,33 +37,26 @@ const resolvers: Type.Resolvers = {
       helper.updateUserInfo(userId, {
         friendIds: friend!.friendIds.concat(me.id)
       })
-
       return newMe
-    },
-    addPost: (parent, { input }, { me }) => {
-      if (!me) throw new Error('Plz Log In First')
-
+    }),
+    addPost: helper.isAuthenticated((parent, { input }, { me }) => {
       const { title, body } = input
       return helper.addPost({ authorId: me.id, title, body })
-    },
-    likePost: (parent, { postId }, { me }) => {
-      if (!me) throw new Error('Plz Log In First')
+    }),
+    likePost: helper.isAuthenticated((parent, { postId }, { me }) => {
       const post = helper.findPostByPostId(postId)
-
       if (!post) throw new Error(`Post ${postId} Not Exists`)
-
       if (!post.likeGiverIds.includes(me.id)) {
         return helper.updatePost(postId, {
           title: post.title,
           likeGiverIds: post.likeGiverIds.concat(me.id)
         })
       }
-
       return helper.updatePost(postId, {
         title: post.title,
         likeGiverIds: post.likeGiverIds.filter(id => id === me.id)
       })
-    },
+    }),
     signUp: async (root, { name, age, email, password }, context) => {
       // 1. 檢查不能有重複註冊 email
       const isUserEmailDuplicate = db.users.some(user => user.email === email)

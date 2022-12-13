@@ -3,6 +3,7 @@ import * as db from '../database'
 import * as Type from '../generated/graphql'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { ForbiddenError } from 'apollo-server'
 const SALT_ROUNDS = 10
 const JWT_SECRET = process.env.JWT_SECRET
 
@@ -23,7 +24,10 @@ export const findUserByName = (name: string) =>
 export const findPostByPostId = (postId: string) =>
   db.posts.find(post => post.id === postId) || null
 
-export const updateUserInfo = (userId: string, data: Type.UpdateMyInfoInput) =>{
+export const updateUserInfo = (
+  userId: string,
+  data: Type.UpdateMyInfoInput
+) => {
   return Object.assign(findUserByUserId(userId)!, data)
 }
 
@@ -75,15 +79,25 @@ export const getMe = async (req: express.Request) => {
       // 2. 檢查 token + 取得解析出的資料
       const me = await jwt.verify(token, JWT_SECRET!)
       // 3. 放進 context
-      return  me 
+      return me
     } catch (e) {
-      console.log(e)
-      throw new Error('Your session expired. Sign in again.')
+      throw new Error('token verify error. Sign in again.')
     }
   }
   // 如果沒有 token 就回傳空的 context 出去
   return null
 }
+
+export const isAuthenticated =
+  (resolverFunc: resolversFncType) =>
+  (
+    parent: any,
+    args: any,
+    context: any
+  ) => {
+    if (!context.me) throw new ForbiddenError('Not logged in.')
+    return resolverFunc.apply(null, [parent, args, context])
+  }
 
 /********************************************************************************
 *
@@ -133,4 +147,12 @@ type createTokenInputType = {
   id: string
   email: string
   name: string
+}
+
+type resolversFncType = {
+  (
+    parent: any,
+    args: any,
+    context: any
+  ): any
 }
