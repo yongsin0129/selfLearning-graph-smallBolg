@@ -66,7 +66,7 @@ export const addUser = async ({
 
 export const createToken = ({ id, email, name }: createTokenInputType) => {
   const jwtToken = jwt.sign({ id, email, name }, JWT_SECRET!, {
-    expiresIn: '1 days'
+    expiresIn: '30 days'
   })
   return jwtToken
 }
