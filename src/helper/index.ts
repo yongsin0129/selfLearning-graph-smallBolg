@@ -79,19 +79,24 @@ export const getMe = async (req: express.Request) => {
       // 2. 檢查 token + 取得解析出的資料
       const me = await jwt.verify(token, JWT_SECRET!)
       // 3. 放進 context
-      return me
+      return { success: true, data: me }
     } catch (e) {
-      throw new Error('token verify error. Sign in again.')
+      return {
+        success: false,
+        message: 'token verify failed. Sign in again.',
+        error: e
+      }
     }
   }
   // 如果沒有 token 就回傳空的 context 出去
-  return null
+  return { success: false, message: 'no token found' }
 }
 
 export const isAuthenticated =
   (resolverFunc: resolversFncType) =>
   (parent: any, args: any, context: any) => {
-    if (!context.me) throw new ForbiddenError('Not logged in.')
+    if (!context.me)
+      throw new ForbiddenError(context.message || 'please log in')
     return resolverFunc.apply(null, [parent, args, context])
   }
 

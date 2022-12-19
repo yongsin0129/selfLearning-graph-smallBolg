@@ -18,16 +18,17 @@ const server = new ApolloServer({
   // Resolver 部分
   resolvers,
   context: async ({ req }) => {
-    const me = await helper.getMe(req)
+    const res = await helper.getMe(req)
+    if (res.success === true) return { me: res.data }
     return {
       // secret: process.env.SECRET
       // PrismaModels,
-      me
+      message:res.message
     }
   },
   persistedQueries: process.env.NODE_ENV === 'production' ? false : undefined,
-  cache: process.env.NODE_ENV === 'production' ? 'bounded' : undefined,
-  // plugins:[ApolloServerPluginLandingPageGraphQLPlayground()] // 另外一種新名字的 ide :  landing page 
+  cache: process.env.NODE_ENV === 'production' ? 'bounded' : undefined
+  // plugins:[ApolloServerPluginLandingPageGraphQLPlayground()] // 另外一種新名字的 ide :  landing page
 })
 
 // 4. 啟動 Server
