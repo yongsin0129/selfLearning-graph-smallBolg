@@ -3,7 +3,7 @@ import * as db from '../database'
 import * as Type from '../generated/graphql'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { ForbiddenError } from 'apollo-server'
+import { AuthenticationError, ForbiddenError } from 'apollo-server'
 const SALT_ROUNDS = 10
 const JWT_SECRET = process.env.JWT_SECRET
 
@@ -96,7 +96,7 @@ export const isAuthenticated =
   (resolverFunc: resolversFncType) =>
   (parent: any, args: any, context: any) => {
     if (!context.me)
-      throw new ForbiddenError(context.message || 'please log in')
+      throw new AuthenticationError(context.message || 'please log in')
     return resolverFunc.apply(null, [parent, args, context])
   }
 

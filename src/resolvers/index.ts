@@ -3,6 +3,11 @@ import * as helper from '../helper'
 import * as db from '../database'
 import bcrypt from 'bcrypt'
 import { custom_resolvers } from './custom'
+import { ApolloError } from 'apollo-server'
+// throw new Error() server內部才能看，client看不到, throw new ApolloError() 會外傳到 client
+// error handling list v3 : https://www.apollographql.com/docs/apollo-server/v3/data/errors 
+// v4 有改版不一樣 : https://www.apollographql.com/docs/apollo-server/data/errors
+
 
 const resolvers: Type.Resolvers = {
   Query: {
@@ -32,7 +37,7 @@ const resolvers: Type.Resolvers = {
     addFriend: helper.isAuthenticated((parent, { userId }, { me }) => {
       const _me = helper.findUserByUserId(me.id)
       if (_me?.friendIds.includes(userId))
-        throw new Error(`User ${userId} Already Friend.`)
+        throw new ApolloError(`User ${userId} Already Friend.`)
       const friend = helper.findUserByUserId(userId)
       // 更新自已的好友清單
       const newMe = helper.updateUserInfo(me.id, {
@@ -55,7 +60,7 @@ const resolvers: Type.Resolvers = {
     ),
     likePost: helper.isAuthenticated((parent, { postId }, { me }) => {
       const post = helper.findPostByPostId(postId)
-      if (!post) throw new Error(`Post ${postId} Not Exists`)
+      if (!post) throw new ApolloError(`Post ${postId} Not Exists`)
       if (!post.likeGiverIds.includes(me.id)) {
         return helper.updatePost(postId, {
           title: post.title,
@@ -70,18 +75,18 @@ const resolvers: Type.Resolvers = {
     signUp: async (root, { name, age, email, password }, context) => {
       // 1. 檢查不能有重複註冊 email
       const isUserEmailDuplicate = db.users.some(user => user.email === email)
-      if (isUserEmailDuplicate) throw new Error('User Email Duplicate')
+      if (isUserEmailDuplicate) throw new ApolloError('User Email Duplicate')
       // 2. 建立新 user
       return helper.addUser({ name, age, email, password })
     },
     login: async (root, { email, password }, context) => {
       // 1. 透過 email 找到相對應的 user
       const user = db.users.find(user => user.email === email)
-      if (!user) throw new Error('Email Account Not Exists')
-      if (!user.password) throw new Error('user password Not Exists')
+      if (!user) throw new ApolloError('Email Account Not Exists')
+      if (!user.password) throw new ApolloError('user password Not Exists')
       // 2. 將傳進來的 password 與資料庫存的 user.password 做比對
       const passwordIsValid = await bcrypt.compare(password, user.password)
-      if (!passwordIsValid) throw new Error('Wrong Password')
+      if (!passwordIsValid) throw new ApolloError('Wrong Password')
 
       // 3. 成功則回傳 token
       return { token: await helper.createToken(user) }
