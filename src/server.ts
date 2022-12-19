@@ -23,12 +23,15 @@ const server = new ApolloServer({
     return {
       // secret: process.env.SECRET
       // PrismaModels,
-      message:res.message
+      message: res.message
     }
   },
   persistedQueries: process.env.NODE_ENV === 'production' ? false : undefined,
-  cache: process.env.NODE_ENV === 'production' ? 'bounded' : undefined
+  cache: process.env.NODE_ENV === 'production' ? 'bounded' : undefined,
   // plugins:[ApolloServerPluginLandingPageGraphQLPlayground()] // 另外一種新名字的 ide :  landing page
+  debug: true
+  // throw new Error() server內部才能看，client看不到, throw new ForbiddenError() 會外傳到 client 
+  // 但如何啟用 debug : true , 就不受上限的限制
 })
 
 // 4. 啟動 Server
